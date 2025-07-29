@@ -1,6 +1,7 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 const vscode = require('vscode');
+const TodoProvider = require('./todoProvider.js');
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -9,6 +10,9 @@ const vscode = require('vscode');
  * @param {vscode.ExtensionContext} context
  */
 function activate(context) {
+
+	const todoProvider = new TodoProvider();
+	vscode.window.registerTreeDataProvider('pinktasksView', todoProvider);
 
 	// Use the console to output diagnostic information (console.log) and errors (console.error)
 	// This line of code will only be executed once when your extension is activated
@@ -26,14 +30,17 @@ function activate(context) {
 
 	// Register the Scan Tasks command separately
 	const scanTasksDisposable = vscode.commands.registerCommand('pinktasks.scanTasks', function () {
+		let todos = {};
 
 		// Find all files in the workspace
+
 		vscode.workspace.findFiles('**/*.{js,ts,jsx,tsx,py,css,html,md,txt,json}', '**/node_modules/**')
 			.then(files => {
 				vscode.window.showInformationMessage(`Found ${files.length} files to scan for tasks`);
 
 				//TODO: Implement the logic to scan these files for tasks
-				files.forEach(file => {
+				// For simplicity, let's just log the files
+				/* files.forEach(file => {
 					vscode.workspace.openTextDocument(file).then(doc => {
 						doc.getText().split('\n')
 							.forEach(line => {
@@ -41,14 +48,45 @@ function activate(context) {
 									vscode.window.showInformationMessage(`Task found in ${file.path}: ${line.trim()}`);
 								}
 							});
-					});
+					}); */
+
+				// Get the file name and tasks from actual scanned data
+				
+
+				Promise.all(
+					files.map(file => vscode.workspace.openTextDocument(file).then(doc => {
+						const lines = doc.getText().split('\n');
+						const relPath = vscode.workspace.asRelativePath(file);
+						lines.forEach((line, index) => {
+							if (line.includes('TODO')) {
+								if (!todos[relPath]) {
+									todos[relPath] = [];
+								}
+								const match = line.match(/TODO[:\s]*(.*)/);
+								if (match) {
+									todos[relPath].push({
+										task: match[1].trim(),
+										line: index + 1
+									});
+								}
+							}
+						});
+						return null;
+					}))
+				).then(() => {
+					const todoArray = Object.entries(todos).map(([file, tasks]) => ({
+						file,
+						tasks
+					}));
+					todoProvider.refresh(todoArray);
 				});
 			});
 	});
 
-	context.subscriptions.push(disposable);
-	context.subscriptions.push(scanTasksDisposable);
+context.subscriptions.push(scanTasksDisposable);
+context.subscriptions.push(disposable);
 }
+
 
 // This method is called when your extension is deactivated
 function deactivate() { }

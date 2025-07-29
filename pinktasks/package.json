@@ -12,6 +12,23 @@
   "activationEvents": [],
   "main": "./extension.js",
   "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "pinktasksSidebar",
+          "title": "PinkTasks",
+          "icon": "vscode/media/clipboard2-check.svg"
+        }
+      ]
+    },
+    "views": {
+      "pinktasksSidebar": [
+        {
+          "id": "pinktasksView",
+          "name": "Tasks"
+        }
+      ]
+    },
     "commands": [
       {
       "command": "pinktasks.helloWorld",
