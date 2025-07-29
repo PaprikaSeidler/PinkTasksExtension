@@ -21,14 +21,37 @@ function activate(context) {
 		// The code you place here will be executed every time your command is executed
 
 		// Display a message box to the user
-		vscode.window.showInformationMessage('Hello World from PinkTasks! PinkTasks is working correctly!');
+		vscode.window.showInformationMessage('You can now start using PinkTasks to manage your tasks!');
+	});
+
+	// Register the Scan Tasks command separately
+	const scanTasksDisposable = vscode.commands.registerCommand('pinktasks.scanTasks', function () {
+
+		// Find all files in the workspace
+		vscode.workspace.findFiles('**/*.{js,ts,jsx,tsx,py,css,html,md,txt,json}', '**/node_modules/**')
+			.then(files => {
+				vscode.window.showInformationMessage(`Found ${files.length} files to scan for tasks`);
+
+				//TODO: Implement the logic to scan these files for tasks
+				files.forEach(file => {
+					vscode.workspace.openTextDocument(file).then(doc => {
+						doc.getText().split('\n')
+							.forEach(line => {
+								if (line.includes('TODO') || line.includes('FIXME')) {
+									vscode.window.showInformationMessage(`Task found in ${file.path}: ${line.trim()}`);
+								}
+							});
+					});
+				});
+			});
 	});
 
 	context.subscriptions.push(disposable);
+	context.subscriptions.push(scanTasksDisposable);
 }
 
 // This method is called when your extension is deactivated
-function deactivate() {}
+function deactivate() { }
 
 module.exports = {
 	activate,

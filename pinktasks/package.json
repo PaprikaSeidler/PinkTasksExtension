@@ -12,10 +12,16 @@
   "activationEvents": [],
   "main": "./extension.js",
   "contributes": {
-    "commands": [{
+    "commands": [
+      {
       "command": "pinktasks.helloWorld",
       "title": "Hello World"
-    }]
+    },
+    {
+      "command": "pinktasks.scanTasks",
+      "title": "Scan Tasks"
+    }
+  ]
   },
   "scripts": {
     "lint": "eslint .",
