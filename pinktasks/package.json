@@ -62,6 +62,16 @@
           "command": "pinktasks.addTag",
           "when": "view == pinktasksView",
           "group": "navigation"
+        },
+        {
+          "command": "pinktasks.exportTasksJson",
+          "when": "view == pinktasksView",
+          "group": "z_export"
+        },
+        {
+          "command": "pinktasks.exportTasksMarkdown",
+          "when": "view == pinktasksView",
+          "group": "z_export"
         }
       ]
     },
@@ -85,6 +95,14 @@
     {
       "command": "pinktasks.addTag",
       "title": "Add Custom Tag +"
+    },
+    {
+      "command": "pinktasks.exportTasksJson",
+      "title": "Export Tasks as JSON"
+    },
+    {
+      "command": "pinktasks.exportTasksMarkdown",
+      "title": "Export Tasks as Markdown"
     }
   ]
   },

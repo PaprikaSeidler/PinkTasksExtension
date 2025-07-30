@@ -4,6 +4,7 @@ const vscode = require('vscode');
 const TodoProvider = require('./todoProvider.js');
 const StatusBar = require('./statusBar.js');
 const { highlightTodos } = require('./decoration.js');
+const ExportTasks = require('./exportTasks.js');
 
 let statusBar;
 
@@ -17,6 +18,8 @@ function activate(context) {
 
 	statusBar = new StatusBar();
 	context.subscriptions.push(statusBar);
+
+	const exportTasks = new ExportTasks();
 
 	vscode.commands.executeCommand('pinktasks.scanTasks');
 
@@ -37,7 +40,7 @@ function activate(context) {
 	// Register the Scan Tasks command separately
 	const scanTasksDisposable = vscode.commands.registerCommand('pinktasks.scanTasks', function () {
 		const config = vscode.workspace.getConfiguration('pinktasks');
-		const scanTags = config.get('scanTags', ['TODO']);
+		//const scanTags = config.get('scanTags', ['TODO']);
 
 		const tagPattern = taskTag.join('|');
 		const regex = new RegExp(`(?:\\/\\/|#|<!--|\\/\\*+)?\\s*(${tagPattern})\\s*[:\\-]?\\s+([^-*>]*)`, 'i');
@@ -62,7 +65,7 @@ function activate(context) {
 									todos[relPath] = [];
 								}
 								todos[relPath].push({
-									task: `${taskType}: ${taskDescription}`,
+									task: `[${taskType}] ${taskDescription}`,
 									line: index + 1
 								});
 							}
@@ -82,16 +85,24 @@ function activate(context) {
 			});
 	});
 
-	// add tag to task
-	const taskTag = ['TODO', 'FIXME', 'NOTE', 'HACK', 'BUG'];
+	// add tag to task - Load saved tags from storage
+	const defaultTags = ['TODO', 'FIXME', 'NOTE', 'HACK', 'BUG'];
+	const savedTags = context.globalState.get('customTags', []);
+	const taskTag = [...defaultTags, ...savedTags];
+	
 	const addTagDisposable = vscode.commands.registerCommand('pinktasks.addTag', async () => {
 		const newTag = await vscode.window.showInputBox({
 			prompt: 'Enter a new tag to add to your tasks',
 			placeHolder: 'New tag e.g., REVIEW, IMPORTANT',
 		});
 
-		if (newTag) {
+		if (newTag && !taskTag.includes(newTag.toUpperCase())) {
 			taskTag.push(newTag.toUpperCase());
+			
+			// Save custom tags (excluding default ones)
+			const customTags = taskTag.filter(tag => !defaultTags.includes(tag));
+			await context.globalState.update('customTags', customTags);
+			
 			vscode.window.showInformationMessage(`Added new tag: ${newTag.toUpperCase()}`);
 			vscode.commands.executeCommand('pinktasks.scanTasks');
 		}
@@ -118,6 +129,14 @@ function activate(context) {
 	const fileSaveListener = vscode.workspace.onDidSaveTextDocument(event => {
 		vscode.commands.executeCommand('pinktasks.scanTasks');
 	});
+	
+	const exportJsonDisposable = vscode.commands.registerCommand('pinktasks.exportTasksJson', async () => {
+		exportTasks.exportJson(todoProvider.getTasks());
+	});
+
+	const exportMarkdownDisposable = vscode.commands.registerCommand('pinktasks.exportTasksMarkdown', async () => {
+		exportTasks.exportMarkdown(todoProvider.getTasks());
+	});
 
 	context.subscriptions.push(scanTasksDisposable);
 	context.subscriptions.push(statusBar);
@@ -125,6 +144,7 @@ function activate(context) {
 	context.subscriptions.push(openFileDisposable);
 	context.subscriptions.push(fileSaveListener);
 	context.subscriptions.push(disposable);
+	context.subscriptions.push(exportJsonDisposable, exportMarkdownDisposable);
 }
 
 

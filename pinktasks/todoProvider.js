@@ -3,11 +3,9 @@ const vscode = require('vscode');
 class TodoProvider {
 
     constructor() {
-        // Hardcoded data for test
-    this.todos = [];
-
-      this._onDidChangeTreeData = new vscode.EventEmitter();
-      this.onDidChangeTreeData = this._onDidChangeTreeData.event;
+        this.todos = [];
+        this._onDidChangeTreeData = new vscode.EventEmitter();
+        this.onDidChangeTreeData = this._onDidChangeTreeData.event;
     }
 
     refresh(updatedTodos) {
@@ -15,6 +13,10 @@ class TodoProvider {
         //this.todos = [...existing, ...updatedTodos]; // ... spread operator to merge arrays
         this.todos = updatedTodos; // Replace with the new todos
         this._onDidChangeTreeData.fire();
+    }
+
+    getTasks() {
+        return this.todos;
     }
 
     getTreeItem(element) {
