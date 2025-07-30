@@ -73,6 +73,13 @@
           "when": "view == pinktasksView",
           "group": "z_export"
         }
+      ],
+      "view/item/context": [
+        {
+          "command": "pinktasks.markAsDone",
+          "when": "view == pinktasksView && viewItem == task",
+          "group": "inline"
+        }
       ]
     },
     "commands": [
@@ -103,6 +110,10 @@
     {
       "command": "pinktasks.exportTasksMarkdown",
       "title": "Export Tasks as Markdown"
+    },
+    {
+      "command": "pinktasks.markAsDone",
+      "title": "Mark Task as Done"
     }
   ]
   },

@@ -1,7 +1,7 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 const vscode = require('vscode');
-const TodoProvider = require('./todoProvider.js');
+const TaskManager = require('./taskManager.js');
 const StatusBar = require('./statusBar.js');
 const { highlightTodos } = require('./decoration.js');
 const ExportTasks = require('./exportTasks.js');
@@ -13,8 +13,8 @@ let statusBar;
  */
 function activate(context) {
 
-	const todoProvider = new TodoProvider();
-	vscode.window.registerTreeDataProvider('pinktasksView', todoProvider);
+	const taskManager = new TaskManager();
+	vscode.window.registerTreeDataProvider('pinktasksView', taskManager);
 
 	statusBar = new StatusBar();
 	context.subscriptions.push(statusBar);
@@ -49,7 +49,10 @@ function activate(context) {
 
 		vscode.workspace.findFiles('**/*.{js,ts,jsx,tsx,py,css,html,md,txt,json}', '**/node_modules/**')
 			.then(files => {
-				vscode.window.showInformationMessage(`Found ${files.length} files to scan for tasks`);
+				if (files.length === 0) {
+					vscode.window.showInformationMessage('No files found to scan for tasks.');
+					return;
+				}
 				
 				Promise.all(
 					files.map(file => vscode.workspace.openTextDocument(file).then(doc => {
@@ -77,7 +80,7 @@ function activate(context) {
 						file,
 						tasks
 					}));
-					todoProvider.refresh(todoArray);
+					taskManager.refresh(todoArray);
 
 					const taskCount = todoArray.reduce((count, item) => count + item.tasks.length, 0);
 					statusBar.update(taskCount);
@@ -131,11 +134,16 @@ function activate(context) {
 	});
 	
 	const exportJsonDisposable = vscode.commands.registerCommand('pinktasks.exportTasksJson', async () => {
-		exportTasks.exportJson(todoProvider.getTasks());
+		exportTasks.exportJson(taskManager.getTasks());
 	});
 
 	const exportMarkdownDisposable = vscode.commands.registerCommand('pinktasks.exportTasksMarkdown', async () => {
-		exportTasks.exportMarkdown(todoProvider.getTasks());
+		exportTasks.exportMarkdown(taskManager.getTasks());
+	});
+
+	const markAsDoneDisposable = vscode.commands.registerCommand('pinktasks.markAsDone', async (task) => {
+		await taskManager.markAsDone(task, taskTag);
+		vscode.commands.executeCommand('pinktasks.scanTasks');
 	});
 
 	context.subscriptions.push(scanTasksDisposable);
@@ -145,6 +153,7 @@ function activate(context) {
 	context.subscriptions.push(fileSaveListener);
 	context.subscriptions.push(disposable);
 	context.subscriptions.push(exportJsonDisposable, exportMarkdownDisposable);
+	context.subscriptions.push(markAsDoneDisposable);
 }
 
 
