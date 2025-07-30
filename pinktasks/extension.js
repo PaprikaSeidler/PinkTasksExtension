@@ -14,6 +14,8 @@ function activate(context) {
 	const todoProvider = new TodoProvider();
 	vscode.window.registerTreeDataProvider('pinktasksView', todoProvider);
 
+	vscode.commands.executeCommand('pinktasks.scanTasks');
+
 	// Use the console to output diagnostic information (console.log) and errors (console.error)
 	// This line of code will only be executed once when your extension is activated
 	console.log('Congratulations, your extension "pinktasks" is now active!');
@@ -30,45 +32,29 @@ function activate(context) {
 
 	// Register the Scan Tasks command separately
 	const scanTasksDisposable = vscode.commands.registerCommand('pinktasks.scanTasks', function () {
+		
 		let todos = {};
-
-		// Find all files in the workspace
 
 		vscode.workspace.findFiles('**/*.{js,ts,jsx,tsx,py,css,html,md,txt,json}', '**/node_modules/**')
 			.then(files => {
 				vscode.window.showInformationMessage(`Found ${files.length} files to scan for tasks`);
-
-				//TODO: Implement the logic to scan these files for tasks
-				// For simplicity, let's just log the files
-				/* files.forEach(file => {
-					vscode.workspace.openTextDocument(file).then(doc => {
-						doc.getText().split('\n')
-							.forEach(line => {
-								if (line.includes('TODO') || line.includes('FIXME')) {
-									vscode.window.showInformationMessage(`Task found in ${file.path}: ${line.trim()}`);
-								}
-							});
-					}); */
-
-				// Get the file name and tasks from actual scanned data
 				
-
 				Promise.all(
 					files.map(file => vscode.workspace.openTextDocument(file).then(doc => {
 						const lines = doc.getText().split('\n');
 						const relPath = vscode.workspace.asRelativePath(file);
 						lines.forEach((line, index) => {
-							if (line.includes('TODO')) {
+							const match = line.match(/(?:\/\/|#|<!--|\/\*+)?\s*(TODO)\s*[:\-]?\s+([^-*>]*)/i);;
+							if (match) {
+								const taskType = match[1].toUpperCase();
+								const taskDescription = match[2].trim();
 								if (!todos[relPath]) {
 									todos[relPath] = [];
 								}
-								const match = line.match(/TODO[:\s]*(.*)/);
-								if (match) {
-									todos[relPath].push({
-										task: match[1].trim(),
-										line: index + 1
-									});
-								}
+								todos[relPath].push({
+									task: `${taskType}: ${taskDescription}`,
+									line: index + 1
+								});
 							}
 						});
 						return null;
@@ -83,8 +69,50 @@ function activate(context) {
 			});
 	});
 
-context.subscriptions.push(scanTasksDisposable);
-context.subscriptions.push(disposable);
+	function scanFile(uri) {
+		vscode.workspace.openTextDocument(uri).then(doc => {
+			const lines = doc.getText().split('\n');
+			const relPath = vscode.workspace.asRelativePath(uri);
+			let todos = [];
+
+			lines.forEach((line, index) => {
+				if (line.includes('TODO')) {
+					const match = line.match(/TODO[:\s]*(.*)/);
+					if (match) {
+						todos.push({
+							task: match[1].trim(),
+							line: index + 1
+						});
+					}
+				}
+			});
+
+			// Opdater todoProvider med kun denne fil
+			todoProvider.refresh([{ file: relPath, tasks: todos }]);
+		});
+	}
+
+	const openFileDisposable = vscode.commands.registerCommand('pinktasks.openFile', (file, task) => {
+		const fullPath = vscode.Uri.file(`${vscode.workspace.workspaceFolders[0].uri.fsPath}/${file}`);
+		vscode.workspace.openTextDocument(fullPath).then(doc => {
+			vscode.window.showTextDocument(doc).then(editor => {
+				const line = task.line - 1; // Convert to zero-based index
+				const position = new vscode.Position(line, 0);
+				const range = new vscode.Range(position, position);
+				editor.selection = new vscode.Selection(position, position);
+				editor.revealRange(range);
+			});
+		});
+	});
+
+	const fileSaveListener = vscode.workspace.onDidSaveTextDocument(event => {
+		vscode.commands.executeCommand('pinktasks.scanTasks');
+	});
+
+	context.subscriptions.push(scanTasksDisposable);
+	context.subscriptions.push(openFileDisposable);
+	context.subscriptions.push(fileSaveListener);
+	context.subscriptions.push(disposable);
 }
 
 

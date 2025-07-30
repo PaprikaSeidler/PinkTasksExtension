@@ -4,29 +4,16 @@ class TodoProvider {
 
     constructor() {
         // Hardcoded data for test
-    this.todos = [
-      /* {
-        file: 'index.js',
-        tasks: [
-          'TODO: Fix the header',
-          'TODO: Add unit tests'
-        ]
-      },
-      {
-        file: 'app.html',
-        tasks: [
-          'TODO: Update layout',
-          'TODO: Fix footer'
-        ]
-      } */
-    ];
+    this.todos = [];
 
       this._onDidChangeTreeData = new vscode.EventEmitter();
       this.onDidChangeTreeData = this._onDidChangeTreeData.event;
     }
 
-    refresh(todos) {
-        this.todos = todos;
+    refresh(updatedTodos) {
+        const existing = this.todos.filter(t => t.file !== updatedTodos.file);
+        //this.todos = [...existing, ...updatedTodos]; // ... spread operator to merge arrays
+        this.todos = updatedTodos; // Replace with the new todos
         this._onDidChangeTreeData.fire();
     }
 
