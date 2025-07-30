@@ -92,15 +92,15 @@ function activate(context) {
 		});
 	}
 
-	const openFileDisposable = vscode.commands.registerCommand('pinktasks.openFile', (file, task) => {
+	const openFileDisposable = vscode.commands.registerCommand('pinktasks.openFile', (file, lineNo) => {
 		const fullPath = vscode.Uri.file(`${vscode.workspace.workspaceFolders[0].uri.fsPath}/${file}`);
 		vscode.workspace.openTextDocument(fullPath).then(doc => {
 			vscode.window.showTextDocument(doc).then(editor => {
-				const line = task.line - 1; // Convert to zero-based index
+				const line = lineNo - 1; 
 				const position = new vscode.Position(line, 0);
 				const range = new vscode.Range(position, position);
 				editor.selection = new vscode.Selection(position, position);
-				editor.revealRange(range);
+				editor.revealRange(range, vscode.TextEditorRevealType.InCenter);
 			});
 		});
 	});

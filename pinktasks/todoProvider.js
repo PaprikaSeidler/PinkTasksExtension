@@ -29,7 +29,7 @@ class TodoProvider {
             item.command = {
                 command: 'pinktasks.openFile',
                 title: 'Open Task',
-                arguments: [element.file, element.task]
+                arguments: [element.file, element.line]
             };
             return item;
         }
