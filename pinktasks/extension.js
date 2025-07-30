@@ -2,18 +2,21 @@
 // Import the module and reference it with the alias vscode in your code below
 const vscode = require('vscode');
 const TodoProvider = require('./todoProvider.js');
+const StatusBar = require('./statusBar.js');
 const { highlightTodos } = require('./decoration.js');
 
-// This method is called when your extension is activated
-// Your extension is activated the very first time the command is executed
+let statusBar;
 
 /**
- * @param {vscode.ExtensionContext} context
+ * @param {vscode.ExtensionContext} context 
  */
 function activate(context) {
 
 	const todoProvider = new TodoProvider();
 	vscode.window.registerTreeDataProvider('pinktasksView', todoProvider);
+
+	statusBar = new StatusBar();
+	context.subscriptions.push(statusBar);
 
 	vscode.commands.executeCommand('pinktasks.scanTasks');
 
@@ -59,39 +62,19 @@ function activate(context) {
 							}
 						});
 						return null;
-					}))
-				).then(() => {
+					})))
+					.then(() => {
 					const todoArray = Object.entries(todos).map(([file, tasks]) => ({
 						file,
 						tasks
 					}));
 					todoProvider.refresh(todoArray);
+
+					const taskCount = todoArray.reduce((count, item) => count + item.tasks.length, 0);
+					statusBar.update(taskCount);
 				});
 			});
 	});
-
-	function scanFile(uri) {
-		vscode.workspace.openTextDocument(uri).then(doc => {
-			const lines = doc.getText().split('\n');
-			const relPath = vscode.workspace.asRelativePath(uri);
-			let todos = [];
-
-			lines.forEach((line, index) => {
-				if (line.includes('TODO')) {
-					const match = line.match(/TODO[:\s]*(.*)/);
-					if (match) {
-						todos.push({
-							task: match[1].trim(),
-							line: index + 1
-						});
-					}
-				}
-			});
-
-			// Opdater todoProvider med kun denne fil
-			todoProvider.refresh([{ file: relPath, tasks: todos }]);
-		});
-	}
 
 	const openFileDisposable = vscode.commands.registerCommand('pinktasks.openFile', (file, lineNo) => {
 		const fullPath = vscode.Uri.file(`${vscode.workspace.workspaceFolders[0].uri.fsPath}/${file}`);
@@ -113,6 +96,7 @@ function activate(context) {
 	});
 
 	context.subscriptions.push(scanTasksDisposable);
+	context.subscriptions.push(statusBar);
 	context.subscriptions.push(openFileDisposable);
 	context.subscriptions.push(fileSaveListener);
 	context.subscriptions.push(disposable);
@@ -120,7 +104,11 @@ function activate(context) {
 
 
 // This method is called when your extension is deactivated
-function deactivate() { }
+function deactivate() { 
+	if (statusBar) {
+		statusBar.dispose();
+	}
+}
 
 module.exports = {
 	activate,

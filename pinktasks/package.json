@@ -54,6 +54,10 @@
     {
       "command": "pinktasks.openFile",
       "title": "Open Task File"
+    },
+    {
+      "command": "pinktasks.updateStatusBar",
+      "title": "Update Status Bar"
     }
   ]
   },
