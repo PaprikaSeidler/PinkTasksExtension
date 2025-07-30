@@ -29,13 +29,14 @@
         {
           "id": "pinktasksSidebar",
           "title": "PinkTasks",
-          "icon": "vscode/media/clipboard2-check.svg"
+          "icon": "media/icon.svg"
         }
       ]
     },
     "views": {
       "pinktasksSidebar": [
         {
+          "icon": "media/icon.svg",
           "id": "pinktasksView",
           "name": "Tasks"
         }
