@@ -4,7 +4,7 @@
   "description": "A todo tasklist styled in pink",
   "version": "0.0.1",
   "engines": {
-    "vscode": "^1.102.0"
+    "vscode": ">=1.102.0" 
   },
   "categories": [
     "Other"
@@ -24,6 +24,20 @@
   ],
   "main": "./extension.js",
   "contributes": {
+    "configuration": {
+      "type": "object",
+      "title": "PinkTasks Settings",
+      "properties": {
+        "pinktasks.scanTasks": {
+          "type": "array",
+          "default": ["TODO"],
+          "description": "List of task keywords to scan for in files.",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
     "viewsContainers": {
       "activitybar": [
         {
@@ -39,6 +53,15 @@
           "icon": "media/icon.svg",
           "id": "pinktasksView",
           "name": "Tasks"
+        }
+      ]
+    },
+    "menus": {
+      "view/title": [
+        {
+          "command": "pinktasks.addTag",
+          "when": "view == pinktasksView",
+          "group": "navigation"
         }
       ]
     },
@@ -58,6 +81,10 @@
     {
       "command": "pinktasks.updateStatusBar",
       "title": "Update Status Bar"
+    },
+    {
+      "command": "pinktasks.addTag",
+      "title": "Add Custom Tag +"
     }
   ]
   },
@@ -75,3 +102,4 @@
     "@vscode/test-electron": "^2.5.2"
   }
 }
+

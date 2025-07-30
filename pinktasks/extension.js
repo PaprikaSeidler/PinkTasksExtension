@@ -36,7 +36,12 @@ function activate(context) {
 
 	// Register the Scan Tasks command separately
 	const scanTasksDisposable = vscode.commands.registerCommand('pinktasks.scanTasks', function () {
-		
+		const config = vscode.workspace.getConfiguration('pinktasks');
+		const scanTags = config.get('scanTags', ['TODO']);
+
+		const tagPattern = taskTag.join('|');
+		const regex = new RegExp(`(?:\\/\\/|#|<!--|\\/\\*+)?\\s*(${tagPattern})\\s*[:\\-]?\\s+([^-*>]*)`, 'i');
+
 		let todos = {};
 
 		vscode.workspace.findFiles('**/*.{js,ts,jsx,tsx,py,css,html,md,txt,json}', '**/node_modules/**')
@@ -47,8 +52,9 @@ function activate(context) {
 					files.map(file => vscode.workspace.openTextDocument(file).then(doc => {
 						const lines = doc.getText().split('\n');
 						const relPath = vscode.workspace.asRelativePath(file);
+
 						lines.forEach((line, index) => {
-							const match = line.match(/(?:\/\/|#|<!--|\/\*+)?\s*(TODO)\s*[:\-]?\s+([^-*>]*)/i);;
+							const match = line.match(regex);
 							if (match) {
 								const taskType = match[1].toUpperCase();
 								const taskDescription = match[2].trim();
@@ -76,6 +82,24 @@ function activate(context) {
 			});
 	});
 
+	// add tag to task
+	const taskTag = ['TODO', 'FIXME', 'NOTE', 'HACK', 'BUG'];
+	const addTagDisposable = vscode.commands.registerCommand('pinktasks.addTag', async () => {
+		const newTag = await vscode.window.showInputBox({
+			prompt: 'Enter a new tag to add to your tasks',
+			placeHolder: 'New tag e.g., REVIEW, IMPORTANT',
+		});
+
+		if (newTag) {
+			taskTag.push(newTag.toUpperCase());
+			vscode.window.showInformationMessage(`Added new tag: ${newTag.toUpperCase()}`);
+			vscode.commands.executeCommand('pinktasks.scanTasks');
+		}
+		else if (newTag) {
+			vscode.window.showErrorMessage(`Tag "${newTag.toUpperCase()}" already exists or is invalid.`);
+		}
+	});
+
 	const openFileDisposable = vscode.commands.registerCommand('pinktasks.openFile', (file, lineNo) => {
 		const fullPath = vscode.Uri.file(`${vscode.workspace.workspaceFolders[0].uri.fsPath}/${file}`);
 		vscode.workspace.openTextDocument(fullPath).then(doc => {
@@ -97,6 +121,7 @@ function activate(context) {
 
 	context.subscriptions.push(scanTasksDisposable);
 	context.subscriptions.push(statusBar);
+	context.subscriptions.push(addTagDisposable);
 	context.subscriptions.push(openFileDisposable);
 	context.subscriptions.push(fileSaveListener);
 	context.subscriptions.push(disposable);
