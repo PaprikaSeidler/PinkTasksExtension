@@ -11,7 +11,7 @@ I often use TODO-style comments while working, and wanted a clean, visual way to
 
 ### 🎯 Smart Task Management
 - **Auto-scan** all project files for TODO, FIXME, NOTE, HACK, and BUG comments  
-- **Custom tags** – Add your own keywords (saved between sessions)  
+- **Custom tags** – Add your own keywords (stored in pinktasks.json for easy team collaboration)  
 - **Multi-language support** – Works with JS, TS, Python, CSS, HTML, Markdown, JSON, and more  
 - **Live updates** – Automatically refreshes when files are saved  
 
