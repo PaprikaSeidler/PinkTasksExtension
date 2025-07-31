@@ -48,7 +48,7 @@
       "properties": {
         "pinktasks.scanTasks": {
           "type": "array",
-          "default": ["TODO"],
+          "default": ["TODO", "FIXME", "BUG", "NOTE", "HACK"],
           "description": "List of task keywords to scan for in files.",
           "items": {
             "type": "string"
