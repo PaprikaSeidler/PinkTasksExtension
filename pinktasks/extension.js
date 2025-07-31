@@ -100,6 +100,20 @@ function activate(context) {
 		}
 	});
 
+	const removeTagDisposable = vscode.commands.registerCommand('pinktasks.removeTag', async () => {
+		const tagToRemove = await vscode.window.showQuickPick(taskTag, {
+			placeHolder: 'Select a tag to remove',
+		});
+
+		if (tagToRemove) {
+			taskTag.splice(taskTag.indexOf(tagToRemove), 1);
+			const customTags = taskTag.filter(tag => !defaultTags.includes(tag));
+			await context.globalState.update('customTags', customTags);
+			vscode.window.showInformationMessage(`Removed tag: ${tagToRemove}`);
+			vscode.commands.executeCommand('pinktasks.scanTasks');
+		}
+	});
+
 	const openFileDisposable = vscode.commands.registerCommand('pinktasks.openFile', (file, lineNo) => {
 		const fullPath = vscode.Uri.file(`${vscode.workspace.workspaceFolders[0].uri.fsPath}/${file}`);
 		vscode.workspace.openTextDocument(fullPath).then(doc => {
@@ -135,6 +149,7 @@ function activate(context) {
 	context.subscriptions.push(scanTasksDisposable);
 	context.subscriptions.push(statusBar);
 	context.subscriptions.push(addTagDisposable);
+	context.subscriptions.push(removeTagDisposable);
 	context.subscriptions.push(openFileDisposable);
 	context.subscriptions.push(fileSaveListener);
 	context.subscriptions.push(exportJsonDisposable, exportMarkdownDisposable);

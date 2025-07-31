@@ -61,7 +61,12 @@
         {
           "command": "pinktasks.addTag",
           "when": "view == pinktasksView",
-          "group": "navigation"
+          "group": "customTag"
+        },
+        {
+          "command": "pinktasks.removeTag",
+          "when": "view == pinktasksView",
+          "group": "customTag"
         },
         {
           "command": "pinktasks.exportTasksJson",
@@ -106,6 +111,10 @@
     {
       "command": "pinktasks.markAsDone",
       "title": "Mark Task as Done"
+    },
+    {
+      "command": "pinktasks.removeTag",
+      "title": "Remove Custom Tag -"
     }
   ]
   },
