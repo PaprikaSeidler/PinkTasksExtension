@@ -1,7 +1,7 @@
 {
   "name": "pinktasks",
   "displayName": "PinkTasks",
-  "description": "A todo tasklist styled in pink",
+  "description": "A todo tasklist with a touch of pink",
   "version": "0.0.1",
   "engines": {
     "vscode": ">=1.102.0" 
@@ -42,7 +42,7 @@
       "activitybar": [
         {
           "id": "pinktasksSidebar",
-          "title": "PinkTasks",
+          "title": "Tasks 🌺",
           "icon": "media/icon.svg"
         }
       ]
@@ -52,7 +52,7 @@
         {
           "icon": "media/icon.svg",
           "id": "pinktasksView",
-          "name": "Tasks"
+          "name": ""
         }
       ]
     },

@@ -5,6 +5,7 @@ const TaskManager = require('./taskManager.js');
 const StatusBar = require('./statusBar.js');
 const { highlightTodos } = require('./decoration.js');
 const ExportTasks = require('./exportTasks.js');
+const TagManager = require('./tagManager.js'); // ÆNDRING: Tilføjet TagManager import for separation of concerns
 
 let statusBar;
 
@@ -20,14 +21,16 @@ function activate(context) {
 	context.subscriptions.push(statusBar);
 
 	const exportTasks = new ExportTasks();
+	const tagManager = new TagManager();
 
 	vscode.commands.executeCommand('pinktasks.scanTasks');
 
 	// This line of code will only be executed once when your extension is activated
 	console.log('The extension "pinktasks" is now active!');
 
-	// Register the Scan Tasks command separately
-	const scanTasksDisposable = vscode.commands.registerCommand('pinktasks.scanTasks', function () {
+	// Register commands
+	const scanTasksDisposable = vscode.commands.registerCommand('pinktasks.scanTasks', async function () {
+		const taskTag = await tagManager.loadTags();
 		const tagPattern = taskTag.join('|');
 		const regex = new RegExp(`(?:\\/\\/|#|<!--|\\/\\*+)?\\s*(${tagPattern})\\s*[:\\-]?\\s+([^-*>]*)`, 'i');
 
@@ -73,11 +76,6 @@ function activate(context) {
 				});
 			});
 	});
-
-	// add tag to task - Load saved tags from storage
-	const defaultTags = ['TODO', 'FIXME', 'NOTE', 'HACK', 'BUG'];
-	const savedTags = context.globalState.get('customTags', []);
-	const taskTag = [...defaultTags, ...savedTags];
 	
 	const addTagDisposable = vscode.commands.registerCommand('pinktasks.addTag', async () => {
 		const newTag = await vscode.window.showInputBox({
@@ -85,32 +83,38 @@ function activate(context) {
 			placeHolder: 'New tag e.g., REVIEW, IMPORTANT',
 		});
 
-		if (newTag && !taskTag.includes(newTag.toUpperCase())) {
-			taskTag.push(newTag.toUpperCase());
-			
-			// Save custom tags (excluding default ones)
-			const customTags = taskTag.filter(tag => !defaultTags.includes(tag));
-			await context.globalState.update('customTags', customTags);
-			
-			vscode.window.showInformationMessage(`Added new tag: ${newTag.toUpperCase()}`);
-			vscode.commands.executeCommand('pinktasks.scanTasks');
-		}
-		else if (newTag) {
-			vscode.window.showErrorMessage(`Tag "${newTag.toUpperCase()}" already exists or is invalid.`);
+		if (newTag) {
+			const success = await tagManager.addTag(newTag);
+			if (success) {
+				vscode.window.showInformationMessage(`Added new tag: ${newTag.toUpperCase()}`);
+				vscode.commands.executeCommand('pinktasks.scanTasks');
+			} else {
+				vscode.window.showErrorMessage(`Tag "${newTag.toUpperCase()}" already exists or couldn't be saved.`);
+			}
 		}
 	});
 
 	const removeTagDisposable = vscode.commands.registerCommand('pinktasks.removeTag', async () => {
-		const tagToRemove = await vscode.window.showQuickPick(taskTag, {
-			placeHolder: 'Select a tag to remove',
+		const currentTags = await tagManager.loadTags();
+		const customTags = currentTags.filter(tag => !tagManager.defaultTags.includes(tag));
+		
+		if (customTags.length === 0) {
+			vscode.window.showInformationMessage('No custom tags to remove.');
+			return;
+		}
+		
+		const tagToRemove = await vscode.window.showQuickPick(customTags, {
+			placeHolder: 'Select a custom tag to remove',
 		});
 
 		if (tagToRemove) {
-			taskTag.splice(taskTag.indexOf(tagToRemove), 1);
-			const customTags = taskTag.filter(tag => !defaultTags.includes(tag));
-			await context.globalState.update('customTags', customTags);
-			vscode.window.showInformationMessage(`Removed tag: ${tagToRemove}`);
-			vscode.commands.executeCommand('pinktasks.scanTasks');
+			const success = await tagManager.removeTag(tagToRemove);
+			if (success) {
+				vscode.window.showInformationMessage(`Removed tag: ${tagToRemove}`);
+				vscode.commands.executeCommand('pinktasks.scanTasks');
+			} else {
+				vscode.window.showErrorMessage('Failed to remove tag.');
+			}
 		}
 	});
 
@@ -142,7 +146,8 @@ function activate(context) {
 	});
 
 	const markAsDoneDisposable = vscode.commands.registerCommand('pinktasks.markAsDone', async (task) => {
-		await taskManager.markAsDone(task, taskTag);
+		const currentTags = await tagManager.loadTags();
+		await taskManager.markAsDone(task, currentTags);
 		vscode.commands.executeCommand('pinktasks.scanTasks');
 	});
 
@@ -157,7 +162,7 @@ function activate(context) {
 }
 
 
-// This method is called when your extension is deactivated
+
 function deactivate() { 
 	if (statusBar) {
 		statusBar.dispose();
