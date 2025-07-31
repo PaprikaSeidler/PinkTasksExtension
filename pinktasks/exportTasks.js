@@ -1,5 +1,4 @@
 const vscode = require('vscode');
-const fs = require('fs');
 
 class ExportTasks {
 
@@ -19,22 +18,15 @@ class ExportTasks {
             return;
         }
 
-        /* fs.writeFile(uri.fsPath, content, (error) => {
-            if (error) {
-                vscode.window.showErrorMessage(`Failed to export tasks: ${error.message}`);
-            } else {
-                vscode.window.showInformationMessage(`Tasks exported to ${uri.fsPath}`);
-            }
-        }); */
         const encoder = new TextEncoder(); // This ensures it's in the right format
-    const uint8Array = encoder.encode(content);
+        const uint8Array = encoder.encode(content);
 
-    try {
-        await vscode.workspace.fs.writeFile(uri, uint8Array);
-        vscode.window.showInformationMessage(`Tasks exported to ${uri.fsPath}`);
-    } catch (error) {
-        vscode.window.showErrorMessage(`Failed to export tasks: ${error.message}`);
-    }
+        try {
+            await vscode.workspace.fs.writeFile(uri, uint8Array);
+            vscode.window.showInformationMessage(`Tasks exported to ${uri.fsPath}`);
+        } catch (error) {
+            vscode.window.showErrorMessage(`Failed to export tasks: ${error.message}`);
+        }
     }
 
     async exportMarkdown(todoArray) {
@@ -52,13 +44,6 @@ class ExportTasks {
             return;
         }
 
-        /*fs.writeFile(uri.fsPath, content, (error) => {
-            if (error) {
-                vscode.window.showErrorMessage(`Failed to export tasks: ${error.message}`);
-            } else {
-                vscode.window.showInformationMessage(`Tasks exported to ${uri.fsPath}`);
-            }
-        }); */
         const encoder = new TextEncoder();
         const uint8Array = encoder.encode(content);
 

@@ -9,8 +9,7 @@ class TaskManager {
     }
 
     refresh(updatedTodos) {
-        const existing = this.todos.filter(t => t.file !== updatedTodos.file);
-        this.todos = updatedTodos; // Replace with the new todos
+        this.todos = updatedTodos;
         this._onDidChangeTreeData.fire();
     }
 

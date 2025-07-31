@@ -23,25 +23,11 @@ function activate(context) {
 
 	vscode.commands.executeCommand('pinktasks.scanTasks');
 
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
 	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "pinktasks" is now active!');
-
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with  registerCommand
-	// The commandId parameter must match the command field in package.json
-	const disposable = vscode.commands.registerCommand('pinktasks.helloWorld', function () {
-		// The code you place here will be executed every time your command is executed
-
-		// Display a message box to the user
-		vscode.window.showInformationMessage('You can now start using PinkTasks to manage your tasks!');
-	});
+	console.log('The extension "pinktasks" is now active!');
 
 	// Register the Scan Tasks command separately
 	const scanTasksDisposable = vscode.commands.registerCommand('pinktasks.scanTasks', function () {
-		const config = vscode.workspace.getConfiguration('pinktasks');
-		//const scanTags = config.get('scanTags', ['TODO']);
-
 		const tagPattern = taskTag.join('|');
 		const regex = new RegExp(`(?:\\/\\/|#|<!--|\\/\\*+)?\\s*(${tagPattern})\\s*[:\\-]?\\s+([^-*>]*)`, 'i');
 
@@ -151,7 +137,6 @@ function activate(context) {
 	context.subscriptions.push(addTagDisposable);
 	context.subscriptions.push(openFileDisposable);
 	context.subscriptions.push(fileSaveListener);
-	context.subscriptions.push(disposable);
 	context.subscriptions.push(exportJsonDisposable, exportMarkdownDisposable);
 	context.subscriptions.push(markAsDoneDisposable);
 }

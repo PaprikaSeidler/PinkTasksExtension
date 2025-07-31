@@ -83,10 +83,6 @@
       ]
     },
     "commands": [
-      {
-      "command": "pinktasks.helloWorld",
-      "title": "Hello World"
-    },
     {
       "command": "pinktasks.scanTasks",
       "title": "Scan Tasks"
@@ -94,10 +90,6 @@
     {
       "command": "pinktasks.openFile",
       "title": "Open Task File"
-    },
-    {
-      "command": "pinktasks.updateStatusBar",
-      "title": "Update Status Bar"
     },
     {
       "command": "pinktasks.addTag",
