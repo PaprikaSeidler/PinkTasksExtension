@@ -1,8 +1,26 @@
 {
   "name": "pinktasks",
   "displayName": "PinkTasks",
-  "description": "A todo tasklist with a touch of pink",
+  "description": "A todo task scanner that finds TODO, FIXME, etc. and custom tags in your code with a splash of pink",
   "version": "0.0.1",
+  "publisher": "PapSei",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/PaprikaSeidler/PinkTasksExtension"
+  },
+  "homepage": "https://github.com/PaprikaSeidler/PinkTasksExtension#readme",
+  "keywords": [
+    "todo",
+    "task",
+    "scanner",
+    "pink",
+    "productivity",
+    "comments",
+    "fixme",
+    "tags"
+  ],
+  "icon": "media/PinkTasks.png",
   "engines": {
     "vscode": ">=1.102.0" 
   },
