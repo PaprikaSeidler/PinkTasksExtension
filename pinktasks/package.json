@@ -2,7 +2,7 @@
   "name": "pinktasks",
   "displayName": "PinkTasks",
   "description": "A todo task scanner that finds TODO, FIXME, etc. and custom tags in your code with a splash of pink",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "publisher": "PapSei",
   "license": "MIT",
   "repository": {

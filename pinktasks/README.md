@@ -20,6 +20,10 @@ A VS Code extension that scans your code for TODO, FIXME, and custom task commen
 5. **Navigate to Code**: Click any task to jump to its location in your code
 6. **Mark Complete**: Hover on task to mark as done and remove it from the sidebar and the code
 
+### 🔍 Quick Demo
+
+![PinkTasks demo](https://raw.githubusercontent.com/PaprikaSeidler/PinkTasksExtension/master/pinktasks/media/PinkTasksDemo-Gif.gif)
+
 ## Supported Languages
 
 - JavaScript (.js)
