@@ -9,7 +9,7 @@ class TaskManager {
     }
 
     refresh(updatedTodos) {
-        this.todos = updatedTodos;
+        this.todos = updatedTodos.sort((a, b) => a.file.localeCompare(b.file));
         this._onDidChangeTreeData.fire();
     }
 
