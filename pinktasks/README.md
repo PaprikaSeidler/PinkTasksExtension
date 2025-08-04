@@ -55,6 +55,11 @@ Initial release of PinkTasks! 🎉
 - Export functionality
 - Task completion marking
 
+### 0.0.3
+
+- Files are now displayed in alphabetical order
+- Random file ordering in sidebar has been resolved
+
 ---
 
 **Enjoy using PinkTasks! 🌺**
